@@ -15,7 +15,7 @@ const thoughtController = {
   },
   //   GET single thought by _id
   getThoughtById({ params }, res) {
-    Thought.findOne({ _id: params.id })
+    Thought.findOne({ _id: params.thoughtId })
       .populate({
         path: "thoughts",
       })
@@ -34,8 +34,9 @@ const thoughtController = {
   addThought({ params, body }, res) {
     Thought.create(body)
       .then(({ _id }) => {
+        console.log(_id);
         return User.findOneAndUpdate(
-          { _id: params.userId },
+          { _id: body.userId },
           { $push: { thoughts: _id } },
           { new: true }
         );
@@ -52,7 +53,9 @@ const thoughtController = {
   },
   //   PUT to update thought by _id
   updateThought({ params, body }, res) {
-    Thought.findOneAndUpdate({ _id: params.id }, body, {
+    console.log(params.thoughtId);
+    console.log(body);
+    Thought.findOneAndUpdate({ _id: params.thoughtId }, body, {
       new: true,
       runValidators: true,
     })
@@ -71,20 +74,20 @@ const thoughtController = {
     Thought.findOneAndDelete({ _id: params.thoughtId })
       .then((deletedThought) => {
         if (!deletedThought) {
-          return res.status(404).json({ message: "No thought with this id! " });
+          return res.status(404).json({ message: "No thought with this id!" });
         }
-        return User.findOneAndUpdate(
-          { _id: params.userId },
+        console.log(deletedThought);
+        User.findOneAndUpdate(
+          { username: deletedThought.username },
           { $pull: { thoughts: params.thoughtId } },
           { new: true }
-        );
-      })
-      .then((dbUserData) => {
-        if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
-          return;
-        }
-        res.json(dbUserData);
+        ).then((dbUserData) => {
+          if (!dbUserData) {
+            res.status(404).json({ message: "No user found with this id!" });
+            return;
+          }
+          res.json(dbUserData);
+        });
       })
       .catch((err) => res.json(err));
   },
@@ -110,7 +113,7 @@ const thoughtController = {
       { _id: params.thoughtId },
       // remove specific reply from replies array
       // where replyId matches value of params.replyId passed in from route
-      { $pull: { reactions: { reactionId: params.reactionId } } },
+      { $pull: { reactions: { _id: params.reactionId } } },
       { new: true }
     )
       .then((dbUserData) => res.json(dbUserData))
