@@ -14,7 +14,8 @@ app.use(express.static('public'));
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/social-network-api", {
     useFindAndModify: false,
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex: true,
 });
 
 // log mongo queries being executed
