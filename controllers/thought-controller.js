@@ -113,7 +113,7 @@ const thoughtController = {
       { _id: params.thoughtId },
       // remove specific reply from replies array
       // where replyId matches value of params.replyId passed in from route
-      { $pull: { reactions: { _id: params.reactionId } } },
+      { $pull: { reactions: { reactionId: params.reactionId } } },
       { new: true }
     )
       .then((dbUserData) => res.json(dbUserData))
